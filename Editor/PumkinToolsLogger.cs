@@ -147,7 +147,8 @@ namespace Pumkin.AvatarTools
             if(string.IsNullOrEmpty(relativePath))
                 return root ? root.name : trans.name;
 
-            return $"{root?.name}/{relativePath}";
+            string rootName = root ? root.name : string.Empty;
+            return string.IsNullOrEmpty(rootName) ? relativePath : $"{rootName}/{relativePath}";
         }
     }
 }

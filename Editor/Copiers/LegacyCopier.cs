@@ -178,29 +178,22 @@ namespace Pumkin.AvatarTools.Copiers
                 }
 
                 SetCopierExceptionContext(nameof(CopyAllTransforms), tFrom, from.transform, tTo, to.transform, typeof(Transform));
-                try
+                if(Settings.bCopier_transforms_copyPosition)
+                    tTo.localPosition = tFrom.localPosition;
+                if(Settings.bCopier_transforms_copyScale)
+                    tTo.localScale = tFrom.localScale;
+                if(Settings.bCopier_transforms_copyRotation)
                 {
-                    if(Settings.bCopier_transforms_copyPosition)
-                        tTo.localPosition = tFrom.localPosition;
-                    if(Settings.bCopier_transforms_copyScale)
-                        tTo.localScale = tFrom.localScale;
-                    if(Settings.bCopier_transforms_copyRotation)
-                    {
-                        tTo.localEulerAngles = tFrom.localEulerAngles;
-                        tTo.localRotation = tFrom.localRotation;
-                    }
-                    if(Settings.bCopier_transforms_copyLayerAndTag)
-                    {
-                        tTo.gameObject.tag = tFrom.gameObject.tag;
-                        tTo.gameObject.layer = tFrom.gameObject.layer;
-                    }
-                    if(Settings.bCopier_transforms_copyActiveState)
-                        tTo.gameObject.SetActive(tFrom.gameObject.activeSelf);
+                    tTo.localEulerAngles = tFrom.localEulerAngles;
+                    tTo.localRotation = tFrom.localRotation;
                 }
-                catch
+                if(Settings.bCopier_transforms_copyLayerAndTag)
                 {
-                    throw;
+                    tTo.gameObject.tag = tFrom.gameObject.tag;
+                    tTo.gameObject.layer = tFrom.gameObject.layer;
                 }
+                if(Settings.bCopier_transforms_copyActiveState)
+                    tTo.gameObject.SetActive(tFrom.gameObject.activeSelf);
 
                 Log(log + Strings.Log.success, LogType.Log);
             }
@@ -243,85 +236,78 @@ namespace Pumkin.AvatarTools.Copiers
                 GameObject rToObj = tTo.gameObject;
                 var smrTo = rToObj.GetComponent<SkinnedMeshRenderer>();
 
-                try
+                if(smrTo == null)
                 {
-                    if(smrTo == null)
+                    if(!Settings.bCopier_skinMeshRender_createObjects)
+                        continue;
+
+
+                    smrTo = rToObj.AddComponent<SkinnedMeshRenderer>();
+
+                    Transform[] newBones = new Transform[smrFrom.bones.Length];
+                    Transform[] oldBones = smrFrom.bones;
+
+                    bool allBonesFound = true;
+                    for(int j = 0; j < newBones.Length; j++)
                     {
-                        if(!Settings.bCopier_skinMeshRender_createObjects)
-                            continue;
-
-
-                        smrTo = rToObj.AddComponent<SkinnedMeshRenderer>();
-
-                        Transform[] newBones = new Transform[smrFrom.bones.Length];
-                        Transform[] oldBones = smrFrom.bones;
-
-                        bool allBonesFound = true;
-                        for(int j = 0; j < newBones.Length; j++)
+                        newBones[j] = Helpers.FindTransformInAnotherHierarchy(oldBones[j], tFromRoot, tToRoot, false);
+                        if(!newBones[j])
                         {
-                            newBones[j] = Helpers.FindTransformInAnotherHierarchy(oldBones[j], tFromRoot, tToRoot, false);
-                            if(!newBones[j])
-                            {
-                                allBonesFound = false;
-                                break;
-                            }
-                        }
-
-                        var newRoot = Helpers.FindTransformInAnotherHierarchy(smrFrom.rootBone, tFromRoot, tToRoot, false);
-
-                        if(!allBonesFound || !newRoot)
-                        {
-                            Log("Couldn't find all bones to assign to skinned mesh renderer.",
-                                LogType.Warning);
-                        }
-                        else
-                        {
-                            smrTo.rootBone = newRoot;
-                            smrTo.bones = newBones;
-                            smrTo.sharedMesh = smrFrom.sharedMesh;
+                            allBonesFound = false;
+                            break;
                         }
                     }
 
-                    if(Settings.bCopier_skinMeshRender_copySettings)
+                    var newRoot = Helpers.FindTransformInAnotherHierarchy(smrFrom.rootBone, tFromRoot, tToRoot, false);
+
+                    if(!allBonesFound || !newRoot)
                     {
-                        var t = Helpers.FindTransformInAnotherHierarchy(smrFrom.rootBone, tFromRoot, tToRoot, false);
-                        smrTo.rootBone = t ? t : smrTo.rootBone;
-
-                        smrTo.allowOcclusionWhenDynamic = smrFrom.allowOcclusionWhenDynamic;
-                        smrTo.quality = smrFrom.quality;
-                        smrTo.probeAnchor = t ? t : smrTo.probeAnchor;
-                        smrTo.lightProbeUsage = smrFrom.lightProbeUsage;
-                        smrTo.reflectionProbeUsage = smrFrom.reflectionProbeUsage;
-                        smrTo.shadowCastingMode = smrFrom.shadowCastingMode;
-                        smrTo.receiveShadows = smrFrom.receiveShadows;
-                        smrTo.motionVectorGenerationMode = smrFrom.motionVectorGenerationMode;
-                        smrTo.skinnedMotionVectors = smrFrom.skinnedMotionVectors;
-                        smrTo.allowOcclusionWhenDynamic = smrFrom.allowOcclusionWhenDynamic;
-                        smrTo.enabled = smrFrom.enabled;
+                        Log("Couldn't find all bones to assign to skinned mesh renderer.",
+                            LogType.Warning);
                     }
-
-                    if(Settings.bCopier_skinMeshRender_copyBlendShapeValues && smrFrom.sharedMesh)
+                    else
                     {
-                        Mesh fromMesh = smrFrom.sharedMesh;
-                        Mesh toMesh = smrTo.sharedMesh;
-                        for(int z = 0; z < smrFrom.sharedMesh.blendShapeCount; z++)
-                        {
-                            int toShapeIndex = toMesh.GetBlendShapeIndex(fromMesh.GetBlendShapeName(z));
-                            if(toShapeIndex != -1)
-                                smrTo.SetBlendShapeWeight(toShapeIndex, smrFrom.GetBlendShapeWeight(z));
-                        }
+                        smrTo.rootBone = newRoot;
+                        smrTo.bones = newBones;
+                        smrTo.sharedMesh = smrFrom.sharedMesh;
                     }
-
-                    if(Settings.bCopier_skinMeshRender_copyMaterials)
-                        smrTo.sharedMaterials = smrFrom.sharedMaterials;
-
-                    if(Settings.bCopier_skinMeshRender_copyBounds)
-                        smrTo.localBounds = smrFrom.localBounds;
                 }
-                catch
+
+                if(Settings.bCopier_skinMeshRender_copySettings)
                 {
-                    throw;
+                    var t = Helpers.FindTransformInAnotherHierarchy(smrFrom.rootBone, tFromRoot, tToRoot, false);
+                    smrTo.rootBone = t ? t : smrTo.rootBone;
+
+                    smrTo.allowOcclusionWhenDynamic = smrFrom.allowOcclusionWhenDynamic;
+                    smrTo.quality = smrFrom.quality;
+                    smrTo.probeAnchor = t ? t : smrTo.probeAnchor;
+                    smrTo.lightProbeUsage = smrFrom.lightProbeUsage;
+                    smrTo.reflectionProbeUsage = smrFrom.reflectionProbeUsage;
+                    smrTo.shadowCastingMode = smrFrom.shadowCastingMode;
+                    smrTo.receiveShadows = smrFrom.receiveShadows;
+                    smrTo.motionVectorGenerationMode = smrFrom.motionVectorGenerationMode;
+                    smrTo.skinnedMotionVectors = smrFrom.skinnedMotionVectors;
+                    smrTo.allowOcclusionWhenDynamic = smrFrom.allowOcclusionWhenDynamic;
+                    smrTo.enabled = smrFrom.enabled;
                 }
+
+                if(Settings.bCopier_skinMeshRender_copyBlendShapeValues && smrFrom.sharedMesh)
+                {
+                    Mesh fromMesh = smrFrom.sharedMesh;
+                    Mesh toMesh = smrTo.sharedMesh;
+                    for(int z = 0; z < smrFrom.sharedMesh.blendShapeCount; z++)
+                    {
+                        int toShapeIndex = toMesh.GetBlendShapeIndex(fromMesh.GetBlendShapeName(z));
+                        if(toShapeIndex != -1)
+                            smrTo.SetBlendShapeWeight(toShapeIndex, smrFrom.GetBlendShapeWeight(z));
+                    }
+                }
+
+                if(Settings.bCopier_skinMeshRender_copyMaterials)
+                    smrTo.sharedMaterials = smrFrom.sharedMaterials;
+
+                if(Settings.bCopier_skinMeshRender_copyBounds)
+                    smrTo.localBounds = smrFrom.localBounds;
 
                 Log(log + Strings.Log.success);
             }
@@ -1190,19 +1176,12 @@ namespace Pumkin.AvatarTools.Copiers
                     continue;
 
                 SetCopierExceptionContext(nameof(CopyTransformActiveStateTagsAndLayer), tFrom, from.transform, tTo, to.transform, typeof(Transform));
-                try
+                if(Settings.bCopier_transforms_copyActiveState)
+                    tTo.gameObject.SetActive(tFrom.gameObject.activeSelf);
+                if(Settings.bCopier_transforms_copyLayerAndTag)
                 {
-                    if(Settings.bCopier_transforms_copyActiveState)
-                        tTo.gameObject.SetActive(tFrom.gameObject.activeSelf);
-                    if(Settings.bCopier_transforms_copyLayerAndTag)
-                    {
-                        to.tag = from.tag;
-                        to.layer = from.layer;
-                    }
-                }
-                catch
-                {
-                    throw;
+                    to.tag = from.tag;
+                    to.layer = from.layer;
                 }
             }
         }

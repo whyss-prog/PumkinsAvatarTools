@@ -169,7 +169,7 @@ namespace Pumkin.AvatarTools.Copiers
 
                 string log = String.Format(Strings.Log.copyAttempt + " - ", tFrom.gameObject.name, from.name, to.name);
 
-                SetCopierExceptionContext(nameof(CopyAllTransforms), tFrom, from.transform, null, to.transform, typeof(Transform));
+                SetCopierExceptionContext(nameof(CopyAllTransforms), tFrom, from.transform, to.transform, to.transform, typeof(Transform));
                 Transform tTo = Helpers.FindTransformInAnotherHierarchy(tFrom, from.transform, to.transform, Settings.bCopier_transforms_createMissing);
                 if(!tTo)
                 {
@@ -199,7 +199,6 @@ namespace Pumkin.AvatarTools.Copiers
                 }
                 catch
                 {
-                    SetCopierExceptionContext(nameof(CopyAllTransforms), tFrom, from.transform, tTo, to.transform, typeof(Transform));
                     throw;
                 }
 
@@ -234,7 +233,7 @@ namespace Pumkin.AvatarTools.Copiers
                 if(Helpers.ShouldIgnoreObject(smrFrom.transform, ignoreSet, Settings.bCopier_ignoreArray_includeChildren))
                     continue;
 
-                SetCopierExceptionContext(nameof(CopyAllSkinnedMeshRenderers), tFrom, tFromRoot, null, tToRoot, typeof(SkinnedMeshRenderer));
+                SetCopierExceptionContext(nameof(CopyAllSkinnedMeshRenderers), tFrom, tFromRoot, tToRoot, tToRoot, typeof(SkinnedMeshRenderer));
                 var tTo = Helpers.FindTransformInAnotherHierarchy(tFrom, tFromRoot, tToRoot, createGameObjects);
 
                 if(!tTo)
@@ -321,7 +320,6 @@ namespace Pumkin.AvatarTools.Copiers
                 }
                 catch
                 {
-                    SetCopierExceptionContext(nameof(CopyAllSkinnedMeshRenderers), tFrom, tFromRoot, tTo, tToRoot, typeof(SkinnedMeshRenderer));
                     throw;
                 }
 
@@ -1186,7 +1184,7 @@ namespace Pumkin.AvatarTools.Copiers
             {
                 if(tFrom == tFrom.root || (ignoreSet != null && Helpers.ShouldIgnoreObject(tFrom, ignoreSet, Settings.bCopier_ignoreArray_includeChildren)))
                     continue;
-                SetCopierExceptionContext(nameof(CopyTransformActiveStateTagsAndLayer), tFrom, from.transform, null, to.transform, typeof(Transform));
+                SetCopierExceptionContext(nameof(CopyTransformActiveStateTagsAndLayer), tFrom, from.transform, to.transform, to.transform, typeof(Transform));
                 Transform tTo = Helpers.FindTransformInAnotherHierarchy(tFrom, from.transform, to.transform, false);
                 if(!tTo)
                     continue;
@@ -1204,7 +1202,6 @@ namespace Pumkin.AvatarTools.Copiers
                 }
                 catch
                 {
-                    SetCopierExceptionContext(nameof(CopyTransformActiveStateTagsAndLayer), tFrom, from.transform, tTo, to.transform, typeof(Transform));
                     throw;
                 }
             }

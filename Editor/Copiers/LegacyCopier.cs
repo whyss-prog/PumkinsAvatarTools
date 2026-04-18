@@ -236,6 +236,7 @@ namespace Pumkin.AvatarTools.Copiers
                 GameObject rToObj = tTo.gameObject;
                 var smrTo = rToObj.GetComponent<SkinnedMeshRenderer>();
                 bool createdSmr = false;
+                bool canAssignMeshToCreatedSmr = false;
 
                 if(smrTo == null)
                 {
@@ -271,10 +272,13 @@ namespace Pumkin.AvatarTools.Copiers
                     {
                         smrTo.rootBone = newRoot;
                         smrTo.bones = newBones;
+                        canAssignMeshToCreatedSmr = true;
                     }
                 }
 
-                if(createdSmr || Settings.bCopier_skinMeshRender_copySettings)
+                if(createdSmr && canAssignMeshToCreatedSmr)
+                    smrTo.sharedMesh = smrFrom.sharedMesh;
+                else if(Settings.bCopier_skinMeshRender_copySettings && !smrTo.sharedMesh)
                     smrTo.sharedMesh = smrFrom.sharedMesh;
 
                 if(Settings.bCopier_skinMeshRender_copySettings)

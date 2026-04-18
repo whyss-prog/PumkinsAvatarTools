@@ -1452,10 +1452,13 @@ namespace Pumkin.AvatarTools
 
             try
             {
+                ClearCopierExceptionContext();
+                SetCopierExceptionContext("CopyComponents:Transforms", objFrom.transform, objFrom.transform, objTo.transform, objTo.transform, typeof(Transform));
                 if(Settings.bCopier_transforms_copy && CopierTabs.ComponentIsInSelectedTab<Transform>(Settings._copier_selectedTab))
                     LegacyCopier.CopyAllTransforms(objFrom, objTo, inst.ignoredTransforms);
             }
-            catch(Exception ex) { Log("_Failed to copy Transforms: " + ex.Message, LogType.Error); }
+            catch(Exception ex) { LogCopierException("_Failed to copy Transforms", ex); }
+            finally { ClearCopierExceptionContext(); }
 
             try
             {
@@ -1466,10 +1469,13 @@ namespace Pumkin.AvatarTools
 
             try
             {
+                ClearCopierExceptionContext();
+                SetCopierExceptionContext("CopyComponents:SkinnedMeshRenderers", objFrom.transform, objFrom.transform, objTo.transform, objTo.transform, typeof(SkinnedMeshRenderer));
                 if(Settings.bCopier_skinMeshRender_copy && CopierTabs.ComponentIsInSelectedTab<SkinnedMeshRenderer>(Settings._copier_selectedTab))
                     LegacyCopier.CopyAllSkinnedMeshRenderers(objFrom, objTo, Settings.bCopier_skinMeshRender_createObjects, inst.ignoredTransforms);
             }
-            catch(Exception ex) { Log("_Failed to copy Skinned Mesh Renderers: " + ex.Message, LogType.Error); }
+            catch(Exception ex) { LogCopierException("_Failed to copy Skinned Mesh Renderers", ex); }
+            finally { ClearCopierExceptionContext(); }
 
             try
             {
@@ -1480,10 +1486,13 @@ namespace Pumkin.AvatarTools
 
             try
             {
+                ClearCopierExceptionContext();
+                SetCopierExceptionContext("CopyComponents:TransformActiveStateLayerTag", objFrom.transform, objFrom.transform, objTo.transform, objTo.transform, typeof(Transform));
                 if(Settings.bCopier_transforms_copy && Settings.bCopier_transforms_copyActiveState && CopierTabs.ComponentIsInSelectedTab<Transform>(Settings._copier_selectedTab))
                     LegacyCopier.CopyTransformActiveStateTagsAndLayer(objFrom, objTo, inst.ignoredTransforms);
             }
-            catch(Exception ex) { Log("_Failed to copy GameObject Active states, Layers and Tags: " + ex.Message, LogType.Error); }
+            catch(Exception ex) { LogCopierException("_Failed to copy GameObject Active states, Layers and Tags", ex); }
+            finally { ClearCopierExceptionContext(); }
 
             if(_DependencyChecker.FinalIKExists && Settings.bCopier_finalIK_copy && CopierTabs.ComponentIsInSelectedTab("finalik", Settings._copier_selectedTab))
             {

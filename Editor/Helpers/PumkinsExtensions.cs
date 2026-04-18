@@ -15,6 +15,11 @@ namespace Pumkin.Extensions
     {
         public static Transform Find(this Transform transform, string childPath, bool createIfMissing = false, Transform otherHierarchyTransform = null)
         {
+            if(!transform)
+                return null;
+            if(string.IsNullOrEmpty(childPath))
+                return transform;
+
             var trans = transform.Find(childPath);
             if(trans)
                 return trans;
@@ -30,7 +35,7 @@ namespace Pumkin.Extensions
             {
                 string childName = childPaths[index];
                 Transform result = nextTransform.Find(childName);
-                Transform otherResult = otherHierarchyTransform ? nextTransformOtherHierarchy.Find(childName) : null;
+                Transform otherResult = nextTransformOtherHierarchy ? nextTransformOtherHierarchy.Find(childName) : null;
                 if(result == null)
                 {
                     result = new GameObject(childName).transform;

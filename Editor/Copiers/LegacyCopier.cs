@@ -295,11 +295,14 @@ namespace Pumkin.AvatarTools.Copiers
                 {
                     Mesh fromMesh = smrFrom.sharedMesh;
                     Mesh toMesh = smrTo.sharedMesh;
-                    for(int z = 0; z < smrFrom.sharedMesh.blendShapeCount; z++)
+                    if(toMesh)
                     {
-                        int toShapeIndex = toMesh.GetBlendShapeIndex(fromMesh.GetBlendShapeName(z));
-                        if(toShapeIndex != -1)
-                            smrTo.SetBlendShapeWeight(toShapeIndex, smrFrom.GetBlendShapeWeight(z));
+                        for(int z = 0; z < smrFrom.sharedMesh.blendShapeCount; z++)
+                        {
+                            int toShapeIndex = toMesh.GetBlendShapeIndex(fromMesh.GetBlendShapeName(z));
+                            if(toShapeIndex != -1)
+                                smrTo.SetBlendShapeWeight(toShapeIndex, smrFrom.GetBlendShapeWeight(z));
+                        }
                     }
                 }
 

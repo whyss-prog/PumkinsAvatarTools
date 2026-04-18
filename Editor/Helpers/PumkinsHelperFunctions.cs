@@ -1039,6 +1039,8 @@ namespace Pumkin.HelperFunctions
                 
                 otherHumanBoneParent = otherAnimator.GetBoneTransform(thisHumanBone);
                 thisHumanBoneParent = thisAnimator.GetBoneTransform(thisHumanBone);
+                if(!otherHumanBoneParent)
+                    return FindTransformInAnotherHierarchyOld(trans, thisHierarchyRoot, otherHierarchyRoot, createIfMissing);
             }
             else
             {
@@ -1046,6 +1048,8 @@ namespace Pumkin.HelperFunctions
                 otherHumanBoneParent = otherHierarchyRoot;
             }
 
+            if(thisPathToHumanBoneParent == null || thisPathToHumanBoneParent.Length == 0)
+                return otherHumanBoneParent;
             string pathToSearch = string.Join('/', thisPathToHumanBoneParent.Select(t => t.name));
             
             Transform target = otherHumanBoneParent.Find(pathToSearch, createIfMissing, thisHumanBoneParent);

@@ -235,6 +235,7 @@ namespace Pumkin.AvatarTools.Copiers
                 SetCopierExceptionContext(nameof(CopyAllSkinnedMeshRenderers), tFrom, tFromRoot, tTo, tToRoot, typeof(SkinnedMeshRenderer));
                 GameObject rToObj = tTo.gameObject;
                 var smrTo = rToObj.GetComponent<SkinnedMeshRenderer>();
+                bool createdSmr = false;
 
                 if(smrTo == null)
                 {
@@ -243,6 +244,7 @@ namespace Pumkin.AvatarTools.Copiers
 
 
                     smrTo = rToObj.AddComponent<SkinnedMeshRenderer>();
+                    createdSmr = true;
 
                     Transform[] newBones = new Transform[smrFrom.bones.Length];
                     Transform[] oldBones = smrFrom.bones;
@@ -269,9 +271,11 @@ namespace Pumkin.AvatarTools.Copiers
                     {
                         smrTo.rootBone = newRoot;
                         smrTo.bones = newBones;
-                        smrTo.sharedMesh = smrFrom.sharedMesh;
                     }
                 }
+
+                if(createdSmr || Settings.bCopier_skinMeshRender_copySettings)
+                    smrTo.sharedMesh = smrFrom.sharedMesh;
 
                 if(Settings.bCopier_skinMeshRender_copySettings)
                 {
@@ -291,13 +295,13 @@ namespace Pumkin.AvatarTools.Copiers
                     smrTo.enabled = smrFrom.enabled;
                 }
 
-                if(Settings.bCopier_skinMeshRender_copyBlendShapeValues && smrFrom.sharedMesh)
+                if(Settings.bCopier_skinMeshRender_copyBlendShapeValues)
                 {
                     Mesh fromMesh = smrFrom.sharedMesh;
                     Mesh toMesh = smrTo.sharedMesh;
-                    if(toMesh)
+                    if(fromMesh && toMesh)
                     {
-                        for(int z = 0; z < smrFrom.sharedMesh.blendShapeCount; z++)
+                        for(int z = 0; z < fromMesh.blendShapeCount; z++)
                         {
                             int toShapeIndex = toMesh.GetBlendShapeIndex(fromMesh.GetBlendShapeName(z));
                             if(toShapeIndex != -1)
